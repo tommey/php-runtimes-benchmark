@@ -15,10 +15,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: '1gb'
+          cpus: '${CPU:-1}'
+          memory: '${MEM:-1}gb'
 
 
 networks:
   php-benchmarks:
+    external: true
 

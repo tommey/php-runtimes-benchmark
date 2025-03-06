@@ -20,7 +20,7 @@ COPY ./runtimes/008_frankenphp_workermode/frankenphp/Caddyfile /etc/caddy/Caddyf
 
 # Issue with php.ini-production, worker can't start.
 #RUN cp $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini
-COPY ./runtimes/008_frankenphp_workermode/frankenphp/conf.d/php.ini $PHP_INI_DIR/conf.d/custom-php.ini
+COPY ./runtimes/008_frankenphp_workermode/frankenphp/conf.d/php.ini $PHP_INI_DIR/conf.d/php.ini
 
 ENV FRANKENPHP_CONFIG="worker ./public/index.php"
 ENV APP_RUNTIME="Runtime\\FrankenPhpSymfony\\Runtime"

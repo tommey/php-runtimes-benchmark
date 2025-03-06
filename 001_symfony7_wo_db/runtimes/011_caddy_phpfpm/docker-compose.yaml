@@ -13,11 +13,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: '1gb'
+          cpus: '${CPU:-1}'
+          memory: '${MEM:-1}gb'
         reservations:
-          cpus: '1'
-          memory: '1gb'
+          cpus: '${CPU:-1}'
+          memory: '${MEM:-1}gb'
 
   003_phpfpm:
     build:
@@ -32,13 +32,14 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: '1gb'
+          cpus: '${CPU:-1}'
+          memory: '${MEM:-1}gb'
         reservations:
-          cpus: '1'
-          memory: '1gb'
+          cpus: '${CPU:-1}'
+          memory: '${MEM:-1}gb'
 
 networks:
   php-benchmarks:
+    external: true
     name: php-benchmarks
 

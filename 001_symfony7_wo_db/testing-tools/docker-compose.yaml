@@ -1,0 +1,62 @@
+services:
+  ab:
+    image: httpd:2.4.58-bookworm
+    command: ["ab", "-c", "${VUS}", "-n", "999999999", "-t", "${DURATION}", "${URL}"]
+    networks:
+      - php-benchmarks
+    profiles:
+      - tool
+
+  bb:
+    image: alpine/bombardier:1.2.6
+    command: ["-c", "${VUS}", "-d", "${DURATION}s", "${URL}"]
+    networks:
+      - php-benchmarks
+    profiles:
+      - tool
+
+  k6:
+    image: ghcr.io/georift/k6-statsd
+    command: ["run", "--vus", "${VUS}", "--duration", "${DURATION}s", "--out", "output-statsd", "/k6_bench.js"]
+    networks:
+      - php-benchmarks
+    environment:
+      K6_STATSD_ADDR: "netdata:8125"
+    platform: "linux/amd64"
+    volumes:
+      - ./k6_bench.js:/k6_bench.js
+    profiles:
+      - tool
+
+  wrk:
+    image: williamyeh/wrk:4.0.2
+    command: ["-c", "${VUS}", "-d", "${DURATION}s", "${URL}"]
+    networks:
+      - php-benchmarks
+    platform: "linux/amd64"
+    profiles:
+      - tool
+
+  netdata:
+    image: netdata/netdata
+    networks:
+      - php-benchmarks
+    ports:
+      - "19999:19999"
+    volumes:
+      - ./netdataconfig:/etc/netdata
+    profiles:
+      - extra
+
+  curl:
+    image: alpine/curl
+    command: ["--no-progress-meter", "-v", "${URL}"]
+    networks:
+      - php-benchmarks
+    profiles:
+      - tool
+
+networks:
+  php-benchmarks:
+    external: true
+    name: php-benchmarks
