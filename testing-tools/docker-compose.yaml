@@ -59,6 +59,7 @@ services:
       - "19999:19999"
     volumes:
       - ./netdata.conf:/etc/netdata/netdata.conf
+      - ./netdata_phpfpm.conf:/etc/netdata/go.d/phpfpm.conf
     profiles:
       - extra
 

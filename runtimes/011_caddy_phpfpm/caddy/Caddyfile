@@ -1,5 +1,9 @@
-# {$SERVER_NAME:localhost} {
 http://localhost http://symfony7site {
     root * /var/www/symfony/public
+    reverse_proxy /fpm-status 011_phpfpm:9001 {
+        transport fastcgi {
+            env SCRIPT_NAME /fpm-status
+        }
+    }
     php_fastcgi 011_phpfpm:9000
 }
