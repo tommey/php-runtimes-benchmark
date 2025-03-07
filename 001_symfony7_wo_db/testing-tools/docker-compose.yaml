@@ -28,6 +28,20 @@ services:
     profiles:
       - tool
 
+  k6-cloud:
+    image: grafana/k6
+    command: ["cloud", "run", "--local-execution", "--vus", "${VUS}", "--duration", "${DURATION}s", "/k6_bench.js"]
+    networks:
+      - php-benchmarks
+    env_file:
+      - .env.k6-cloud
+    environment:
+      K6_CLOUD_NAME: "${RUNTIME:-phpbenchmarks}"
+    volumes:
+      - ./k6_bench.js:/k6_bench.js
+    profiles:
+      - tool
+
   wrk:
     image: williamyeh/wrk:4.0.2
     command: ["-c", "${VUS}", "-d", "${DURATION}s", "${URL}"]

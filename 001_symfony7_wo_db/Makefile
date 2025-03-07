@@ -33,7 +33,7 @@ endif
 
 TEE := tee -a $(logfile)
 
-RUN_ENV := VUS=$(vus) DURATION=$(duration) URL="$(bench_url)"
+RUN_ENV := VUS=$(vus) DURATION=$(duration) URL="$(bench_url)" RUNTIME=$(runtime)
 RUN := cd testing-tools && $(RUN_ENV) docker compose --profile extra up -d && $(RUN_ENV) docker compose --profile tool run --rm
 
 help : Makefile
@@ -44,6 +44,7 @@ help : Makefile
 	@echo "Available tools:"
 	@echo "  ab (default)"
 	@echo "  k6"
+	@echo "  k6-cloud"
 	@echo "  bb - bombardier"
 	@echo "  wrk"
 	@echo
@@ -81,6 +82,10 @@ ab:
 k6:
 	$(RUN) k6 2>&1 | $(TEE)
 
+## k6-cloud: Run k6 locally, reporting to cloud
+k6-cloud:
+	$(RUN) k6-cloud 2>&1 | $(TEE)
+
 ## bb      : Run bombardier
 bb:
 	$(RUN) bb 2>&1 | $(TEE)
@@ -106,5 +111,5 @@ bench/%:
 ## all     : Run benchmark for all runtimes
 all:
 	@for name in $(runtimes); do \
-		make -j1 bench/$${name} runtime=$${name}; \
+		$(MAKE) -j1 bench/$${name} runtime=$${name}; \
 	done
