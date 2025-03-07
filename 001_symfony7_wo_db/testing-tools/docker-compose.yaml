@@ -44,7 +44,7 @@ services:
     ports:
       - "19999:19999"
     volumes:
-      - ./netdataconfig:/etc/netdata
+      - ./netdata.conf:/etc/netdata/netdata.conf
     profiles:
       - extra
 
