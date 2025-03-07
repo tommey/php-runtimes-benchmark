@@ -6,7 +6,8 @@ memory ?= 1
 tool ?= ab
 vus ?= 100
 duration ?= 30
-bench_url ?= http://symfony7site/?firstName=Randomlfirstname&lastName=Randomlastname
+busy ?= no
+bench_url ?= http://symfony7site/?firstName=Randomlfirstname&lastName=Randomlastname&busy=$(busy)
 
 dirs := $(sort $(wildcard runtimes/*))
 runtimes := $(notdir $(dirs))
@@ -57,6 +58,7 @@ help : Makefile
 	@echo "  tool      = $(tool)"
 	@echo "  vus       = $(vus) (concurrent connections)"
 	@echo "  duration  = $(duration) (seconds)"
+	@echo "  busy      = $(busy) (do busy work and waiting or just render)"
 	@echo "  bench_url = $(bench_url)"
 
 ## start/% : Start runtime
