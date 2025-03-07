@@ -15,7 +15,7 @@ runtimes := $(notdir $(dirs))
 MAKE += cpu=$(cpu) memory=$(memory) tool=$(tool) vus=$(vus) duration=$(duration) bench_url="$(bench_url)"
 
 define getLogfile
-$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/$(1)_$(cpu)vcpu_$(memory)gb_$(tool)_$(vus)_$(duration)_$(shell date +'%Y%m%d%H%M%S').log
+$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/log/$(1)_$(cpu)vcpu_$(memory)gb_$(tool)_$(vus)_$(duration)_$(shell date +'%Y%m%d%H%M%S').log
 endef
 
 ifndef runtime

@@ -11,6 +11,12 @@ The repo contains the Symfony 7 application skeleton to be run in different runt
 - FrankenPHP
 - FrankenPHP (worker mode)
 - Swoole
+- Adapterman
+- Caddy + PHP-FPM
+
+It also contains a Symfony 6 application skeleton to be run in different runtimes:
+
+- ReactPHP
 
 ## URLs
 
@@ -23,7 +29,22 @@ The repo contains the Symfony 7 application skeleton to be run in different runt
 
 ## Run load tests
 
-Load tests are run inside docker container, which is in the same network as the runtime.
+Load tests are executed inside docker containers, the runtimes are defined in their own compose file,
+while the load test tools as well, but they are on the same network.
+
+**Exactly one runtime must be started first!**
+
+See `make help` for default values used for the testing as well as all available runtimes and targets.
+
+CLI output is saved in log files named by runtime name, variable values and timestamp in [log](log).
+
+### ALL
+
+Run testing for all runtimes:
+
+```shell
+make all tool=k6 vus=100 duration=10 busy=yes # example, define vars as needed
+```
 
 ### Bombardier
 
@@ -31,11 +52,7 @@ Load tests are run inside docker container, which is in the same network as the 
 - https://hub.docker.com/r/alpine/bombardier
 
 ```shell
-make run/loadtest/bombardier-c5-d30s # Run bombardier concurrent connections: 5, duration: 30s
-make run/loadtest/bombardier-c10-d30s # Run bombardier concurrent connections: 10, duration: 30s
-make run/loadtest/bombardier-c100-d30s # Run bombardier concurrent connections: 100, duration: 30s
-make run/loadtest/bombardier-c1000-d30s # Run bombardier concurrent connections: 1000, duration: 30s
-make run/loadtest/bombardier-c10000-d30s # Run bombardier concurrent connections: 10000, duration: 30s
+make bb
 ```
 
 ### Apache HTTP server benchmarking tool
@@ -43,9 +60,7 @@ make run/loadtest/bombardier-c10000-d30s # Run bombardier concurrent connections
 - https://httpd.apache.org/docs/2.4/programs/ab.html
 
 ```shell
-make run/loadtest/ab-n100-c5
-make run/loadtest/ab-n1000-c100
-make run/loadtest/ab-n10000-c1000
+make ab
 ```
 
 ### K6 (by Grafana Labs)
@@ -53,45 +68,59 @@ make run/loadtest/ab-n10000-c1000
 - https://k6.io/docs/
 - https://k6.io/docs/using-k6/metrics/reference/
 
-See js scripts in 001_symfony7_wo_db/testing-tools/k6
+See js scripts: [k6_bench.js](001_symfony7_wo_db/testing-tools/k6_bench.js).
 
+#### Local
+
+Reporting to netdata, available at http://localhost:19999
 ```shell
-make run/loadtest/k6-vus5-dur30s
-make run/loadtest/k6-vus10-dur30s
-make run/loadtest/k6-vus100-dur30s
-make run/loadtest/k6-vus1000-dur30s
-make run/loadtest/k6-vus10000-dur30s
+make k6
 ```
 
-## 001: Apache(prefork mode) + mod_php
+#### Cloud
+
+Local execution, but Grafana Cloud reporting.
+
+Requires [.env.k6-cloud](001_symfony7_wo_db/testing-tools/.env.k6-cloud.dist), copy the .dist file and modify.
+
+```shell
+make k6-cloud
+```
+
+## Runtimes
+
+All runtimes have 4 targets:
+```shell
+make start/% # Start the runtime with build and recreate
+make stop/%  # Stop and destroy the runtime containers
+make shell/% # Step into the running container
+
+make bench/% # Run load tests
+```
+
+Bench will start/% the runtime, wait 3 seconds, check with curl if bench_url responds,
+then execute the benchmark tool, finally stop/% the runtime.
+
+### 001: Apache(prefork mode) + mod_php
 
 - http://localhost/server-status
 
 
 ```shell
-make start/runtime/001-apache-modphp
-make stop/runtime/001-apache-modphp
-make rebuild/runtime/001-apache-modphp
-make down/runtime/001-apache-modphp
-make shell/runtime/001-apache-modphp
+make bench/001_apache_modphp
 ```
 
-## 002: Apache + PHP-FPM
+### 002: Apache + PHP-FPM
 
 - http://localhost/apache-status
 - http://localhost/fpm-status?html&full
 
 
 ```shell
-make start/runtime/002-apache-phpfpm
-make stop/runtime/002-apache-phpfpm
-make rebuild/runtime/002-apache-phpfpm
-make down/runtime/002-apache-phpfpm
-make shell/runtime/002-apache
-make shell/runtime/002-phpfpm
+make bench/002_apache_phpfpm
 ```
 
-## 003: Nginx + PHP-FPM
+### 003: Nginx + PHP-FPM
 
 - http://localhost/fpm-status?html&full
 
@@ -106,27 +135,18 @@ ps --no-headers -o "rss,cmd" -C php-fpm | awk '{ sum+=$1 } END { printf ("%d%s\n
 ```
 
 ```shell
-make start/runtime/003-nginx-phpfpm
-make stop/runtime/003-nginx-phpfpm
-make rebuild/runtime/003-nginx-phpfpm
-make down/runtime/003-nginx-phpfpm
-make shell/runtime/003-nginx
-make shell/runtime/003-phpfpm
+make bench/003_nginx_phpfpm
 ```
 
-## 004: Nginx Unit + PHP Language module
+### 004: Nginx Unit + PHP Language module
 
 - https://unit.nginx.org/configuration/#php
 
 ```shell
-make start/runtime/004-nginx-unit
-make stop/runtime/004-nginx-unit
-make rebuild/runtime/004-nginx-unit
-make down/runtime/004-nginx-unit
-make shell/runtime/004-unit
+make bench/004_nginx_unit
 ```
 
-## 005: Roadrunner
+### 005: Roadrunner
 
 The symfony/runtime component is used
 
@@ -134,14 +154,10 @@ The symfony/runtime component is used
 - https://github.com/baldinof/roadrunner-bundle
 
 ```shell
-make start/runtime/005-roadrunner
-make stop/runtime/005-roadrunner
-make rebuild/runtime/005-roadrunner
-make down/runtime/005-roadrunner
-make shell/runtime/005-roadrunner
+make bench/005_roadrunner
 ```
 
-## 006: Nginx + Roadrunner(fcgi mode)
+### 006: Nginx + Roadrunner(fcgi mode)
 
 The symfony/runtime component is used
 
@@ -149,47 +165,38 @@ The symfony/runtime component is used
 - https://github.com/baldinof/roadrunner-bundle
 
 ```shell
-make start/runtime/006-nginx-roadrunner
-make stop/runtime/006-nginx-roadrunner
-make rebuild/runtime/006-nginx-roadrunner
-make down/runtime/006-nginx-roadrunner
-make shell/runtime/006-nginx
-make shell/runtime/006-roadrunner
+make bench/006_nginx_roadrunner
 ```
 
-## 007: Frankenphp
+### 007: Frankenphp
 
 The symfony/runtime component is used
 
 - https://frankenphp.dev/docs/
 
 ```shell
-make start/runtime/007-frankenphp
+make bench/007_frankenphp
 make stop/runtime/007-frankenphp
 make rebuild/runtime/007-frankenphp
 make down/runtime/007-frankenphp
 make shell/runtime/007-frankenphp
 ```
 
-## 008: Frankenphp (workermode)
+### 008: Frankenphp (workermode)
 
 The symfony/runtime component is used
 
 - https://frankenphp.dev/docs/worker/
 
 ```shell
-make start/runtime/008-frankenphp-workermode
-make stop/runtime/008-frankenphp-workermode
-make rebuild/runtime/008-frankenphp-workermode
-make down/runtime/008-frankenphp-workermode
-make shell/runtime/008-frankenphp-workermode
+make bench/008_frankenphp_workermode
 ```
 
 ### Issues
 - FrankenPHP can't start with production version of php.ini, which is provided with official PHP image
 
 
-## 009: Swoole
+### 009: Swoole
 
 The symfony/runtime component is used
 
@@ -197,9 +204,25 @@ The symfony/runtime component is used
 - https://swoole.com/docs
 
 ```shell
-make start/runtime/009-swoole
-make stop/runtime/009-swoole
-make rebuild/runtime/009-swoole
-make down/runtime/009-swoole
-make shell/runtime/009-swoole
+make bench/009_swoole
+```
+
+
+### 010: Adapterman
+
+The symfony/runtime component is used
+
+- https://github.com/joanhey/AdapterMan
+
+```shell
+make bench/010_adapterman
+```
+
+
+### 011: Caddy + PHP-FPM
+
+- https://caddyserver.com/
+
+```shell
+make bench/011_caddy_phpfpm
 ```
