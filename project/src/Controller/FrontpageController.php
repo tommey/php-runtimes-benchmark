@@ -18,7 +18,7 @@ class FrontpageController extends AbstractController
     {
         if ($busy !== 'no') {
             $busy = '';
-            for ($i = random_int(100, 1000); $i > 0; $i--) {
+            for ($i = random_int(1000, 10000); $i > 0; $i--) {
                 $busy .= random_bytes(random_int(1, 5));
             }
             $max = random_int(1, 10000) === 1 ? 1000000 : 100000;
