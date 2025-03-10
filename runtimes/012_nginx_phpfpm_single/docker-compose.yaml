@@ -1,0 +1,27 @@
+services:
+  012_nginx_phpfpm_single:
+    build:
+      context: ../../
+      dockerfile: ./runtimes/012_nginx_phpfpm_single/Dockerfile
+    image: 012_nginx_phpfpm
+    container_name: "012_nginx_phpfpm"
+    hostname: symfony7site
+    ports:
+      - "80:80"
+      - "9001:9001"
+    networks:
+      - php-benchmarks
+    deploy:
+      resources:
+        limits:
+          cpus: '${CPU:-1}'
+          memory: '${MEM:-1}gb'
+        reservations:
+          cpus: '${CPU:-1}'
+          memory: '${MEM:-1}gb'
+
+networks:
+  php-benchmarks:
+    external: true
+    name: php-benchmarks
+
