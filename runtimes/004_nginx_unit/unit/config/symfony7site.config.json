@@ -25,10 +25,7 @@
   "applications": {
     "symfony": {
       "type": "php",
-      "processes": {
-        "spare": 1,
-        "idle_timeout": 20
-      },
+      "processes": 33,
       "targets": {
         "direct": {
           "root": "/var/www/symfony/public/"
